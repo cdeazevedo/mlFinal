@@ -183,6 +183,7 @@ print(cTreeMod)
 ## The final value used for the model was cp = 0.02983905.
 ```
 
+#####So it's easy to see that Random Forests was vastly superior to Regression trees.
 
 ###Prediction Time
 
