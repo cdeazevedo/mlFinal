@@ -183,42 +183,6 @@ print(cTreeMod)
 ## The final value used for the model was cp = 0.02983905.
 ```
 
-#### Compare results
-
-```r
-rfPred <- predict(rfMod, testingMod)
-cTreePred <- predict(cTreeMod, testingMod)
-
-table(rfPred, testingMod$classe)
-```
-
-```
-## Error in table(rfPred, testingMod$classe): all arguments must have the same length
-```
-
-```r
-table(cTreePred, testingMod$classe)
-```
-
-```
-## Error in table(cTreePred, testingMod$classe): all arguments must have the same length
-```
-
-```r
-confusionMatrix(rfPred, testingMod$classe)
-```
-
-```
-## Error in confusionMatrix.default(rfPred, testingMod$classe): the data cannot have more levels than the reference
-```
-
-```r
-confusionMatrix(cTreePred, testingMod$classe)
-```
-
-```
-## Error in confusionMatrix.default(cTreePred, testingMod$classe): the data cannot have more levels than the reference
-```
 
 ###Prediction Time
 
