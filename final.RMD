@@ -1,0 +1,124 @@
+---
+title: "Final Project"
+author: "Christian"
+output: html_document
+---
+
+# Final project for Applied Machine Learning
+## Predicting exercise quality using Fitbit data
+### Christian de Azevedo
+This is my final project for the Johns Hopkins / Coursera machine learning course
+Data are from http://groupware.les.inf.puc-rio.br/har
+
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+Read more: http://groupware.les.inf.puc-rio.br/har#ixzz48nBLYBRP
+
+Much thanks to them.
+
+A description of the project is as follows:
+
+> Six young health participants were asked to perform one set of 10 repetitions of the Unilateral Dumbbell Biceps Curl in five different fashions: exactly according to the specification (Class A), throwing the elbows to the front (Class B), lifting the dumbbell only halfway (Class C), lowering the dumbbell only halfway (Class D) and throwing the hips to the front (Class E).
+
+
+The goal of this project is to find a machine learning algorithm that can predict how an exercise was performed.
+
+```{r echo = FALSE}
+require(caret)
+trainingOrig <- read.csv("C:/Users/defen/OneDrive/Documents/R/pml-training.csv", 
+  na.strings = c("NA", ""))
+testingOrig <- read.csv("C:/Users/defen/OneDrive/Documents/R/pml-testing.csv", 
+  na.strings = c("NA", ""))
+dim(trainingOrig)
+dim(testingOrig)
+```
+
+#### Project Steps
+
+1. remove irrelevant variables (time, user identification, etc)
+2. remove variables that are missing data
+3. subset training data into training/testing for cross-validation
+   + 70% training
+   + 30% testing
+   + 3-fold cross validation
+4. Remove variables with near zero variance   
+5. Compare some algorithms
+   + Random Forest Model
+   + glm
+6. make predictions on remaining test data using best algorithm
+
+
+
+####Remove variables with NA 
+
+```{r}
+trainingMod <- trainingOrig[, colSums(is.na(trainingOrig)) == 0]
+testingMod <- testingOrig[, colSums(is.na(testingOrig)) == 0]
+dim(trainingMod)
+dim(testingMod)
+```
+
+####Remove variables with near zero variance 
+```{r}
+nzv <- nearZeroVar(trainingMod)
+trainingMod <- trainingMod[, -nzv]
+testingMod <- testingMod[, -nzv]
+dim(trainingMod)
+dim(testingMod)
+
+```
+
+####Remove irrelevant variables
+```{r}
+trainingMod <- trainingMod[, -(1:7)]
+testingMod <- testingMod[, -(1:7)]
+dim(trainingMod)
+dim(testingMod)
+```
+
+
+####Setup Training and Testing sub data (70-30 split) for Cross Validation
+
+```{r}
+inTrain <- createDataPartition(y = trainingMod$classe, p = 0.7,
+                                list = FALSE)
+training <- trainingMod[inTrain, ]; testing <- trainingMod[-inTrain, ]
+
+```
+
+###Prediction Model Training
+
+####Random Forest Model
+```{r}
+
+rfMod <- train(classe ~ ., method = "rf", data = trainingMod, verbose = FALSE, prox = TRUE,
+  allowParallel = TRUE)
+
+print(rfMod)
+```
+
+#### Classification Tree
+```{r}
+
+cTreeMod <- train(classe ~ ., method = "rpart", data = trainingMod, verbose = FALSE,
+  allowParallel = TRUE)
+ 
+print(cTreeMod)
+```
+
+#### Compare results
+```{r}
+rfPred <- predict(rfMod, testingMod)
+cTreePred <- predict(cTreeMod, testingMod)
+
+table(rfPred, testingMod$classe)
+table(cTreePred, testingMod$classe)
+
+confustionMatrix(rfPred, testingMod$classe)
+confustionMatrix(cTreePred, testingMod$classe)
+```
+
+###Prediction Time
+```{r}
+finalPrediction <- predict(rfMod, testingMod) 
+write.csv(finalPrediction, file = "predictions.csv")
+```
