@@ -1,7 +1,7 @@
 ---
 title: "Final Project"
 author: "Christian"
-output: html_document
+output: html_document 
 ---
 
 # Final project for Applied Machine Learning
